@@ -4,7 +4,8 @@
     <title>Simple Snake Game</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
+	<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'nonce-random'; script-src 'self' 'nonce-random';">
+    <style nonce="random">
      canvas {
 		border: 1px solid black;
 		background-color: #f0f0f0;
@@ -13,6 +14,6 @@
   </head>
   <body>
     <canvas id="canvas" width="400" height="400"></canvas>
-    <script src="snake.js"></script>
+    <script nonce="random" src="snake.js"></script>
   </body>
 </html>
