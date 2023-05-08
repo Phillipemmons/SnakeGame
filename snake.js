@@ -1,6 +1,7 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const scale = 10;
+const restartButton = document.getElementById("restart-button");
 
 class Snake {
   constructor() {
@@ -80,6 +81,12 @@ class Snake {
 
     return false;
   }
+  
+  checkGameOver() {
+    // Check if the snake hits the edge or itself
+    return (this.x >= canvas.width || this.y >= canvas.height || this.x < 0 || this.y < 0) ||
+      this.tail.some(tailSegment => tailSegment.x === this.x && tailSegment.y === this.y);
+  }
 }
 
 class Fruit {
@@ -94,12 +101,47 @@ class Fruit {
   }
 }
 
-const snake = new Snake();
-const fruit = new Fruit();
+let snake = new Snake();
+let fruit = new Fruit();
 
 document.addEventListener("keydown", function(event) {
   snake.changeDirection(event.code);
 });
+
+// Touch controls
+let touchStartX = 0;
+let touchStartY = 0;
+
+canvas.addEventListener("touchstart", function(event) {
+  event.preventDefault();
+  touchStartX = event.touches[0].clientX;
+  touchStartY = event.touches[0].clientY;
+}, false);
+
+canvas.addEventListener("touchend", function(event) {
+  event.preventDefault();
+  let touchEndX = event.changedTouches[0].clientX;
+  let touchEndY = event.changedTouches[0].clientY;
+
+  let deltaX = touchEndX - touchStartX;
+  let deltaY = touchEndY - touchStartY;
+
+  if (Math.abs(deltaX) > Math.abs(deltaY)) {
+    // Horizontal swipe
+    if (deltaX > 0) {
+      snake.changeDirection("ArrowRight");
+    } else {
+      snake.changeDirection("ArrowLeft");
+    }
+  } else {
+    // Vertical swipe
+    if (deltaY > 0) {
+      snake.changeDirection("ArrowDown");
+    } else {
+      snake.changeDirection("ArrowUp");
+    }
+  }
+}, false);
 
 function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -112,14 +154,19 @@ function gameLoop() {
     fruit.y = Math.floor(Math.random() * canvas.height / scale) * scale;
   }
 
-  if (snake.checkCollision()) {
-    snake.total = 0;
-    snake.tail = [];
-    // Uncomment the line below to end the game instead of resetting the snake
-    // return;
+  if (snake.checkGameOver()) {
+    restartButton.style.display = "block";
+    return;
   }
 
   setTimeout(gameLoop, 100);
 }
+
+restartButton.addEventListener("click", function() {
+  snake = new Snake();
+  fruit = new Fruit();
+  restartButton.style.display = "none";
+  gameLoop();
+});
 
 gameLoop();
